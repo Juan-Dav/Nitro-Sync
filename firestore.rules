@@ -1,0 +1,106 @@
+rules_version = '2';
+
+/*
+=======================================================
+NITRO SYNC - REGLAS DE FIRESTORE
+=======================================================
+
+ESTRUCTURA PROTEGIDA
+
+  usuarios/{uid}                    -> perfil
+  usuarios/{uid}/vehiculos/{id}     -> vehículos
+  usuarios/{uid}/vehiculos/{id}/... -> documentos,
+                                       mantenimientos,
+                                       recordatorios,
+                                       gastos
+  administradores/{uid}             -> cuentas con rol admin
+  opiniones/{uid}                   -> encuesta de opinión
+
+ROLES
+
+  usuario        -> solo accede a sus propios datos.
+  administrador  -> su uid existe en administradores/.
+                    Lee todos los vehículos y puede
+                    actualizar únicamente los campos del
+                    seguro. Lee todas las opiniones.
+
+Los administradores se crean SOLO desde la consola de
+Firebase (nadie puede promoverse desde la app).
+
+CÓMO APLICAR ESTAS REGLAS
+
+  Consola de Firebase -> Firestore Database -> Reglas
+  -> pegar este contenido -> Publicar.
+=======================================================
+*/
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function autenticado() {
+      return request.auth != null;
+    }
+
+    function esAdmin() {
+      return autenticado()
+        && exists(/databases/$(database)/documents/administradores/$(request.auth.uid));
+    }
+
+    function calificacionValida(valor) {
+      return valor is int && valor >= 1 && valor <= 5;
+    }
+
+    match /administradores/{uid} {
+      allow read: if autenticado() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /usuarios/{uid} {
+      allow read: if esAdmin();
+    }
+
+    match /usuarios/{uid}/{documento=**} {
+      allow read, write: if autenticado()
+                         && request.auth.uid == uid;
+    }
+
+    match /usuarios/{uid}/vehiculos/{vehiculoId}/{subcoleccion=**} {
+      allow read: if esAdmin();
+    }
+
+    match /{ruta=**}/vehiculos/{vehiculoId} {
+      allow read: if esAdmin();
+
+      allow update: if esAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'aseguradora',
+          'telefonoAseguradora',
+          'numeroPoliza',
+          'vencimientoSeguro',
+          'seguroAsignadoPor',
+          'seguroAsignadoFecha'
+        ]);
+    }
+
+    match /opiniones/{uid} {
+      allow read: if autenticado() && (request.auth.uid == uid || esAdmin());
+
+      allow create, update: if autenticado()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && calificacionValida(request.resource.data.calificacion)
+        && calificacionValida(request.resource.data.facilidad)
+        && calificacionValida(request.resource.data.diseno)
+        && calificacionValida(request.resource.data.utilidad)
+        && request.resource.data.recomienda is bool
+        && request.resource.data.comentario is string
+        && request.resource.data.comentario.size() <= 500;
+
+      allow delete: if false;
+    }
+
+    match /{documento=**} {
+      allow read, write: if false;
+    }
+  }
+}
