@@ -27,10 +27,9 @@ existe sesión no se muestra la pantalla de login.
 
 import {
   DefaultTheme,
+  Stack,
   ThemeProvider,
-} from 'expo-router/react-navigation';
-
-import { Stack } from 'expo-router';
+} from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 import {

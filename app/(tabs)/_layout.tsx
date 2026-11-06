@@ -19,9 +19,20 @@ cambian de color cuando la pestaña está activa.
 
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+import type { ColorValue } from 'react-native';
 
 import { Paleta } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+
+/*
+React Navigation entrega el color del icono como ColorValue, que
+también puede ser un número ya procesado. Ionicons solo acepta
+string u OpaqueColorValue, así que se descarta el caso numérico
+(en esta app los tintes siempre son colores hex).
+*/
+function colorDeIcono(color: ColorValue) {
+  return typeof color === 'number' || color === null ? undefined : color;
+}
 
 export default function TabsLayout() {
   const { esAdmin } = useAuth();
@@ -52,7 +63,7 @@ export default function TabsLayout() {
           headerShown: false,
           href: esAdmin ? null : undefined,
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color} />
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={colorDeIcono(color)} />
           ),
         }}
       />
@@ -65,7 +76,7 @@ export default function TabsLayout() {
           headerShown: false,
           href: esAdmin ? null : undefined,
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'car-sport' : 'car-sport-outline'} size={size} color={color} />
+            <Ionicons name={focused ? 'car-sport' : 'car-sport-outline'} size={size} color={colorDeIcono(color)} />
           ),
         }}
       />
@@ -77,7 +88,7 @@ export default function TabsLayout() {
           headerShown: false,
           href: esAdmin ? undefined : null,
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'shield-checkmark' : 'shield-checkmark-outline'} size={size} color={color} />
+            <Ionicons name={focused ? 'shield-checkmark' : 'shield-checkmark-outline'} size={size} color={colorDeIcono(color)} />
           ),
         }}
       />
@@ -89,7 +100,7 @@ export default function TabsLayout() {
           headerShown: false,
           href: esAdmin ? undefined : null,
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'stats-chart' : 'stats-chart-outline'} size={size} color={color} />
+            <Ionicons name={focused ? 'stats-chart' : 'stats-chart-outline'} size={size} color={colorDeIcono(color)} />
           ),
         }}
       />
@@ -101,7 +112,7 @@ export default function TabsLayout() {
           headerShown: false,
           href: esAdmin ? null : undefined,
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'star' : 'star-outline'} size={size} color={color} />
+            <Ionicons name={focused ? 'star' : 'star-outline'} size={size} color={colorDeIcono(color)} />
           ),
         }}
       />
@@ -113,7 +124,7 @@ export default function TabsLayout() {
           title: 'Ajustes',
           headerShown: false,
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'settings' : 'settings-outline'} size={size} color={color} />
+            <Ionicons name={focused ? 'settings' : 'settings-outline'} size={size} color={colorDeIcono(color)} />
           ),
         }}
       />

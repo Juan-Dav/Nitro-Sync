@@ -91,8 +91,13 @@ export function NotificationBannerProvider({
 
   const [actual, setActual] = useState<BannerOptions | null>(null);
 
-  const translateY = useRef(new Animated.Value(-220)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+  /*
+  Los valores de Animated se guardan con useState (no con
+  useRef) para poder leerlos durante el render sin romper la
+  regla react-hooks/refs que exige el React Compiler.
+  */
+  const [translateY] = useState(() => new Animated.Value(-220));
+  const [opacity] = useState(() => new Animated.Value(0));
   const ocultarTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {

@@ -365,7 +365,7 @@ function PanelAdmin() {
       ListEmptyComponent={
         !cargando && !error ? (
           <Text style={styles.vacio}>No hay vehículos con este filtro.</Text>
-        ) : null
+        ) : undefined
       }
       contentContainerStyle={styles.contenido}
       keyboardShouldPersistTaps="handled"
